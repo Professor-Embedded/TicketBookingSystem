@@ -1,0 +1,49 @@
+Write a C code for a movie ticket booking system in C.
+ 
+=> Constraints
+Movies - 2, (different price)
+Screen - 2, (movie and time)
+Seats - 50 (A to J rows and 1 to 5 columns) (same price for all)
+Shows in a Day - 6, (3 shows/screen, any of 2 movies)
+ 
+=> Features:
+Book tickets
+Cancel tickets
+Show available tickets
+View booking records
+ 
+=> Note
+You are to use advanced topics like structure, pointer, pre-processors, etc.
+Make different files c/h (libraries and sources).
+Single Makefile to compile all source code.
+Make a good user interface if possible (Refer *1)
+The ticket number should be unique.
+The theater name can be hardcoded.
+ 
+*1 UI options
+Selection of Action (Book, Cancel, View records)
+	For booking
+		- Select Movie -> Select Time -> Select seat(s) -> Show total amount -> Ask confirm -> Print ticket(Refer *2)
+	For cancellation
+		- Ticket no -> Print ticket -> Ask confirm
+	For records
+		- Print booking + cancellation history
+	For availability
+		- Select Movie -> Select Time -> Print all available seats (Tabular form)
+		E.g.
+			A1  A2  A3  A4  A5
+			B1         B3  B4  B5
+			C1  C2         C4 C5
+		The booked tickets are 'blanks' (B2 and C3 in the example)
+ 
+*2 Ticket 
+==================================================
+<Theater Name>
+==================================================
+Ticket No: <xxx>					                                        Movie Ticket
+==================================================
+Screen: <1-9>						                                 <Movie Name>		
+Seat: <AtoZ>/<0-9>
+Time: HH: MM
+Date: DD/MM/YYYY						                                  Price: <>
+==================================================
