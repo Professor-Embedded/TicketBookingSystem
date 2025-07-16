@@ -39,7 +39,7 @@ typedef struct{
         char date[11];
 }Tickets;
 
-
+// blah blah 
 //---------------Structure initialization-------------//
 Movie movies[NO_OF_SCREENS] = { 
 				{1, "Badass Ravi Kumar"},
