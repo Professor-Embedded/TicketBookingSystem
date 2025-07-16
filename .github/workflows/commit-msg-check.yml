@@ -1,0 +1,72 @@
+name: Commit Message Line-by-Line Validator
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  validate-commit-message:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install GitHub CLI
+        uses: cli/gh-action@v2
+
+      - name: Fetch PR Commits
+        id: fetch
+        run: |
+          COMMITS=$(gh pr view ${{ github.event.pull_request.number }} --json commits --jq '.commits[].oid')
+          echo "$COMMITS" > commits.txt
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Validate Commit Message Format
+        run: |
+          echo "🔍 Validating commit messages..."
+
+          while read COMMIT_HASH; do
+            echo "---- Checking commit $COMMIT_HASH ----"
+            COMMIT_MSG=$(git log --format=%B -n 1 "$COMMIT_HASH")
+
+            IFS=$'\n' read -d '' -r -a LINES <<< "$COMMIT_MSG"
+
+            # Expected format:
+            # 0: <Package Name> <Package Version>: Fix <CVE ID>
+            # 1: (blank line)
+            # 2: Upstream Repository: <URL>
+            # 3: (blank line)
+            # 4: Bug Details: <URL>
+            # 5: Type: Security Fix
+            # 6: CVE: <CVE ID>
+            # 7: Score: <CVSS score>
+            # 8: Patch: <URL>
+            # 9: (blank line)
+            #10: Jira-Id: <Jira ID>
+            #11: Signed-off-by: <Name> <Email>
+
+            if [[ ${#LINES[@]} -ne 12 ]]; then
+              echo "❌ Commit does not have exactly 12 lines. Found: ${#LINES[@]}"
+              exit 1
+            fi
+
+            # Validate each line
+            [[ "${LINES[0]}" =~ ^[a-zA-Z0-9._-]+ [0-9]+\.[0-9]+: Fix CVE-[0-9]{4}-[0-9]{4,}$ ]] || { echo "❌ Line 1 format error"; exit 1; }
+            [[ -z "${LINES[1]}" ]] || { echo "❌ Line 2 should be blank"; exit 1; }
+            [[ "${LINES[2]}" =~ ^Upstream Repository:\ https?://.+$ ]] || { echo "❌ Line 3 format error"; exit 1; }
+            [[ -z "${LINES[3]}" ]] || { echo "❌ Line 4 should be blank"; exit 1; }
+            [[ "${LINES[4]}" =~ ^Bug Details:\ https?://.+$ ]] || { echo "❌ Line 5 format error"; exit 1; }
+            [[ "${LINES[5]}" == "Type: Security Fix" ]] || { echo "❌ Line 6 must be 'Type: Security Fix'"; exit 1; }
+            [[ "${LINES[6]}" =~ ^CVE:\ CVE-[0-9]{4}-[0-9]{4,}$ ]] || { echo "❌ Line 7 format error"; exit 1; }
+            [[ "${LINES[7]}" =~ ^Score:\ [0-9]+(\.[0-9]+)?$ ]] || { echo "❌ Line 8 should be a valid score"; exit 1; }
+            [[ "${LINES[8]}" =~ ^Patch:\ https?://.+$ ]] || { echo "❌ Line 9 format error"; exit 1; }
+            [[ -z "${LINES[9]}" ]] || { echo "❌ Line 10 should be blank"; exit 1; }
+            [[ "${LINES[10]}" =~ ^Jira-Id:\ [A-Z]+-[0-9]+$ ]] || { echo "❌ Line 11 format error"; exit 1; }
+            [[ "${LINES[11]}" =~ ^Signed-off-by:\ .+ \<.+\>$ ]] || { echo "❌ Line 12 must have Signed-off-by format"; exit 1; }
+
+            echo "✅ Commit $COMMIT_HASH passed format check."
+
+          done < commits.txt
+        shell: bash
