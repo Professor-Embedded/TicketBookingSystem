@@ -1,0 +1,35 @@
+name: Create Jira Ticket on PR
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  create-jira-issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Jira issue
+        env:
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_URL="${{ github.event.pull_request.html_url }}"
+          PROJECT_KEY="SCRUM" # replace with your Jira project key
+
+          curl -X POST "$JIRA_BASE_URL/rest/api/3/issue" \
+          --user "$JIRA_USER_EMAIL:$JIRA_API_TOKEN" \
+          --header 'Content-Type: application/json' \
+          --data '{
+            "fields": {
+              "project": {
+                "key": "'"$PROJECT_KEY"'"
+              },
+              "summary": "'"$PR_TITLE"'",
+              "description": "Created automatically for PR: '"$PR_URL"'",
+              "issuetype": {
+                "name": "Task"
+              }
+            }
+          }'
