@@ -5,6 +5,7 @@
 #include <time.h>
 // adding comment please work
 //added another line
+//change
 #define NO_OF_SCREENS 2
 #define NO_OF_SEATS 50
 #define ROWS 10
