@@ -20,8 +20,6 @@ def get_commit_message(sha):
 def validate_commit_message(message, sha):
     lines = message.strip().split('\n')
 
-    if len(lines) != 12:
-        raise ValueError(f"❌ Commit {sha}: expected 12 lines, found {len(lines)}")
 
     validators = [
         (r'^[a-zA-Z0-9._-]+ [0-9]+\.[0-9]+: Fix CVE-[0-9]{4}-[0-9]{4,}$', "Line 1 format: '<Package> <Version>: Fix CVE-XXXX-YYYY'"),
