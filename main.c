@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <time.h>
-
+// new comment
 #define NO_OF_SCREENS 2
 #define NO_OF_SEATS 50
 #define ROWS 10
