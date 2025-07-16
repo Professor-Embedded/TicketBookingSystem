@@ -1,4 +1,4 @@
-name: Validate Commit Messages (Python)
+name: Validate Commit Messages on PR
 
 on:
   pull_request:
@@ -9,26 +9,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout PR code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Needed to get full commit history
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
-      - name: Install GitHub CLI
-        run: |
-          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
-          sudo apt-add-repository https://cli.github.com/packages
-          sudo apt-get update
-          sudo apt-get install gh -y
-
-      - name: Install dependencies
-        run: pip install --quiet requests
+      - name: Install Python dependencies
+        run: pip install requests
 
       - name: Run commit message validator
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python .github/scripts/validate_commit_messages.py ${{ github.event.pull_request.number }}
+          python .github/scripts/validate_commit_messages.py
